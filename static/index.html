@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Diabetes Risk Assessment</title>
+      
+      <style>
+          body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              background-color: #eef2f5;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              min-height: 100vh;
+              margin: 0;
+              color: #333;
+          }
+          .container {
+              background-color: white;
+              padding: 40px;
+              border-radius: 12px;
+              box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+              width: 100%;
+              max-width: 400px;
+          }
+          h1 {
+              text-align: center;
+              margin: 0 0 30px 0;
+              color: #1e293b;
+              font-size: 24px;
+          }
+          .form-group {
+              margin-bottom: 20px;
+          }
+          label {
+              display: block;
+              margin-bottom: 8px;
+              font-weight: 600;
+              font-size: 0.9em;
+              color: #475569;
+          }
+          input, select {
+              width: 100%;
+              padding: 12px;
+              box-sizing: border-box;
+              border: 1px solid #cbd5e1;
+              border-radius: 6px;
+              background-color: #f8fafc;
+              transition: border-color 0.2s;
+              font-size: 14px;
+          }
+          input:focus, select:focus {
+              outline: none;
+              border-color: #3b82f6;
+              background-color: white;
+          }
+          button {
+              width: 100%;
+              padding: 14px;
+              background-color: #3b82f6; 
+              color: white;
+              border: none;
+              border-radius: 6px;
+              cursor: pointer;
+              font-size: 16px;
+              font-weight: 600;
+              margin-top: 10px;
+              transition: background-color 0.2s;
+          }
+          button:hover {
+              background-color: #2563eb;
+          }
+          #result {
+              margin-top: 25px;
+              padding: 15px;
+              text-align: center;
+              font-weight: bold;
+              display: none;
+              border-radius: 6px;
+          }
+          .result-high { color: #dc2626; background-color: #fee2e2; border: 1px solid #fecaca; }
+          .result-low { color: #15803d; background-color: #dcfce7; border: 1px solid #bbf7d0; }
+          .error { color: #b45309; background-color: #ffedd5; border: 1px solid #fed7aa; }
+          
+          .footer {
+              margin-top: 20px;
+              text-align: center;
+              font-size: 0.8em;
+              color: #94a3b8;
+          }
+      </style>
+  </head>
+
+  <body>
+    <div class="container">
+        <h1>Diabetes Risk Assessor</h1>
+        <form id="assessmentForm">
+            
+            <div class="form-group">
+                <label for="model_type">Analysis Model</label>
+                <select id="model_type">
+                    <option value="naive_bayes">Naive Bayes Generative Classifier</option>
+                    <option value="mlp">MLP (Multi-Layer Perceptron)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="age">Patient Age</label>
+                <input type="number" id="age" required placeholder="e.g 20">
+            </div>
+
+            <div class="form-group">
+                <label for="glucose">Glucose Level (mg/dL)</label>
+                <input type="number" id="glucose" required placeholder="e.g. 120">
+            </div>
+
+            <div class="form-group">
+                <label for="insulin">Insulin Level (mu U/ml)</label>
+                <input type="number" id="insulin" required placeholder="e.g. 80">
+            </div>
+
+            <div class="form-group">
+                <label for="bmi">BMI (Body Mass Index)</label>
+                <input type="number" step="0.1" id="bmi" required placeholder="e.g. 28.5">
+            </div>
+            <div id="result"></div>
+            <button type="submit">Submit</button>
+        </form> 
+    </div>
+
+    <script>
+        document.getElementById('assessmentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            const btn = this.querySelector('button');
+            
+            btn.textContent = "Analyzing...";
+            btn.disabled = true;
+            resultDiv.style.display = 'none';
+
+            const data = {
+                model_type: document.getElementById('model_type').value,
+                age: document.getElementById('age').value,
+                glucose: document.getElementById('glucose').value,
+                insulin: document.getElementById('insulin').value,
+                bmi: document.getElementById('bmi').value
+            };
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                resultDiv.style.display = 'block';
+                
+                if (response.ok) {
+                    if (result.prediction === 1) {
+                        resultDiv.textContent = "Prediction: Diabetic";
+                        resultDiv.className = 'result-high';
+                    } else {
+                        resultDiv.textContent = "Prediction: Non-Diabetic";
+                        resultDiv.className = 'result-low';
+                    }
+                } else {
+                    resultDiv.textContent = "Error: " + (result.error || "Unknown system error");
+                    resultDiv.className = 'error';
+                }
+            } catch (err) {
+                console.error(err);
+                resultDiv.style.display = 'block';
+                resultDiv.textContent = "Connection failed. Ensure server is running.";
+                resultDiv.className = 'error';
+            } finally {
+                btn.textContent = "Run Analysis";
+                btn.disabled = false;
+            }
+        });
+    </script>
+  </body>
+</html>
