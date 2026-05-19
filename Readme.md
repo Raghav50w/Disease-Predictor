@@ -1,7 +1,5 @@
 # HealthScan AI - Comprehensive Multi-Disease Risk Predictor
 
-![HealthScan AI](ui_overview.png) *(Placeholder for UI screenshot)*
-
 **HealthScan AI** is an advanced, machine learning-powered web application designed to predict the risk of three critical diseases: **Diabetes**, **Heart Disease**, and **Breast Cancer**. 
 
 Unlike standard diagnostic tools that rely on a single algorithm, HealthScan AI provides a robust **Multi-Model architecture**. It dynamically trains and evaluates four distinct machine learning algorithms for each disease, allowing users and medical professionals to compare predictions across different computational approaches.
