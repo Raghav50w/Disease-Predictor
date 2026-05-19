@@ -5,3 +5,5 @@ __pycache__/
 .DS_Store
 .env
 .vs/
+project_improvements.md
+PLAN.md
