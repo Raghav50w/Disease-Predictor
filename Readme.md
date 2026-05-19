@@ -184,8 +184,3 @@ To reduce the burden on healthcare workers entering data, this platform only req
 - **Insulin Level**: 2-Hour serum insulin (mu U/ml).
 - **BMI**: Body mass index (weight in kg/(height in m)^2).
 - **Patient Age**: The patient's age in years.
-
----
-
-## ⚠️ Disclaimer
-**For educational and research purposes only.** This tool is a machine learning demonstration and does not provide official medical diagnoses. Always consult a qualified healthcare professional for medical advice, diagnosis, or treatment.
