@@ -1,362 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Health Risk Assessment</title>
-      <meta name="description" content="AI-powered health risk assessment for Diabetes, Heart Disease, and Breast Cancer.">
-      
-      <style>
-          body {
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-              background-color: #eef2f5;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              min-height: 100vh;
-              margin: 0;
-              color: #333;
-          }
-          .container {
-              background-color: white;
-              padding: 40px;
-              border-radius: 12px;
-              box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-              width: 100%;
-              max-width: 440px;
-          }
-          h1 {
-              text-align: center;
-              margin: 0 0 6px 0;
-              color: #1e293b;
-              font-size: 24px;
-          }
-          .subtitle {
-              text-align: center;
-              color: #94a3b8;
-              font-size: 0.82em;
-              margin-bottom: 28px;
-          }
-          .form-group {
-              margin-bottom: 18px;
-          }
-          label {
-              display: block;
-              margin-bottom: 7px;
-              font-weight: 600;
-              font-size: 0.9em;
-              color: #475569;
-          }
-          input, select {
-              width: 100%;
-              padding: 12px;
-              box-sizing: border-box;
-              border: 1px solid #cbd5e1;
-              border-radius: 6px;
-              background-color: #f8fafc;
-              transition: border-color 0.2s;
-              font-size: 14px;
-          }
-          input:focus, select:focus {
-              outline: none;
-              border-color: #3b82f6;
-              background-color: white;
-          }
-          button {
-              width: 100%;
-              padding: 14px;
-              background-color: #3b82f6; 
-              color: white;
-              border: none;
-              border-radius: 6px;
-              cursor: pointer;
-              font-size: 16px;
-              font-weight: 600;
-              margin-top: 10px;
-              transition: background-color 0.2s;
-          }
-          button:hover {
-              background-color: #2563eb;
-          }
-          button:disabled {
-              opacity: 0.6;
-              cursor: not-allowed;
-          }
-          #result {
-              margin-top: 25px;
-              padding: 15px;
-              text-align: center;
-              font-weight: bold;
-              display: none;
-              border-radius: 6px;
-          }
-          .result-high { color: #dc2626; background-color: #fee2e2; border: 1px solid #fecaca; }
-          .result-low { color: #15803d; background-color: #dcfce7; border: 1px solid #bbf7d0; }
-          .error { color: #b45309; background-color: #ffedd5; border: 1px solid #fed7aa; }
-          
-          .footer {
-              margin-top: 20px;
-              text-align: center;
-              font-size: 0.78em;
-              color: #94a3b8;
-          }
-
-          .divider {
-              border: none;
-              border-top: 1px solid #e2e8f0;
-              margin: 22px 0;
-          }
-
-          #dynamicFields .form-group {
-              animation: fadeIn 0.25s ease;
-          }
-
-          @keyframes fadeIn {
-              from { opacity: 0; transform: translateY(6px); }
-              to { opacity: 1; transform: translateY(0); }
-          }
-      </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthScanner &mdash; Multi-Disease Risk Assessment</title>
+    <meta name="description" content="Multi-disease risk assessment for diabetes, heart disease, and breast cancer. A student project, not a medical tool.">
+    <link rel="stylesheet" href="/static/css/styles.css">
   </head>
 
   <body>
-    <div class="container">
-        <h1>Health Risk Assessor</h1>
-        <p class="subtitle">Multi-disease prediction powered by ML</p>
+    <main class="shell">
+      <header class="masthead">
+        <h1>HealthScanner</h1>
+        <p class="tagline">Multi-disease risk assessment with scikit-learn</p>
+      </header>
 
-        <form id="assessmentForm">
-            <div class="form-group">
-                <label for="disease_select">Select Disease</label>
-                <select id="disease_select">
-                    <!-- Populated dynamically -->
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="model_select">Select ML Model</label>
-                <select id="model_select">
-                    <!-- Populated dynamically based on disease -->
-                </select>
+      <div class="card">
+        <form id="assessment-form" novalidate>
+          <div class="selectors">
+            <div class="field">
+              <label for="disease-select">Condition</label>
+              <select id="disease-select" name="disease"></select>
             </div>
 
-            <hr class="divider">
-
-            <div id="dynamicFields">
-                <!-- Built dynamically based on selected disease -->
+            <div class="field">
+              <label for="model-select">Model</label>
+              <select id="model-select" name="model_type"></select>
             </div>
+          </div>
 
-            <div id="result"></div>
-            <button type="submit" id="submitBtn">Analyze Risk</button>
+          <hr class="divider">
+
+          <fieldset class="measurements">
+            <legend>Measurements</legend>
+            <div class="grid" id="dynamic-fields"></div>
+          </fieldset>
+
+          <button type="submit" id="submit-btn">
+            <span class="btn-label">Analyse risk</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
         </form>
-    </div>
 
-    <script>
-        // -----------------------------------------------
-        // State
-        // -----------------------------------------------
-        let diseasesData = {};
-        let currentDisease = null;
+        <div id="result" class="result" role="status" aria-live="polite" hidden></div>
+      </div>
 
-        // -----------------------------------------------
-        // Init
-        // -----------------------------------------------
-        async function init() {
-            try {
-                const res = await fetch('/diseases');
-                diseasesData = await res.json();
-                buildDiseaseDropdown();
-            } catch (err) {
-                console.error('Failed to load diseases:', err);
-                document.getElementById('dynamicFields').innerHTML =
-                    '<p style="color:#b45309;text-align:center;">Failed to connect to server.</p>';
-            }
-        }
+      <footer class="colophon">
+        <p class="disclaimer">
+          This is a student learning project, not a professional medical tool.
+          It should not be used for diagnosis or treatment choices.
+        </p>
+        <p class="links">
+          <a href="/api/diseases">API</a>
+          <span aria-hidden="true">&middot;</span>
+          <a href="/api/metrics">Metrics</a>
+          <span aria-hidden="true">&middot;</span>
+          <a href="/healthz">Health</a>
+        </p>
+      </footer>
+    </main>
 
-        // -----------------------------------------------
-        // Build the disease dropdown
-        // -----------------------------------------------
-        function buildDiseaseDropdown() {
-            const select = document.getElementById('disease_select');
-            select.innerHTML = '';
-
-            for (const [key, info] of Object.entries(diseasesData)) {
-                const opt = document.createElement('option');
-                opt.value = key;
-                opt.textContent = info.display_name;
-                select.appendChild(opt);
-            }
-
-            // Select first disease and build its form & models
-            if (Object.keys(diseasesData).length > 0) {
-                currentDisease = Object.keys(diseasesData)[0];
-                buildModelDropdown(currentDisease);
-                buildForm(currentDisease);
-            }
-
-            select.addEventListener('change', (e) => {
-                currentDisease = e.target.value;
-                buildModelDropdown(currentDisease);
-                buildForm(currentDisease);
-                document.getElementById('result').style.display = 'none';
-            });
-        }
-
-        // -----------------------------------------------
-        // Build the model dropdown
-        // -----------------------------------------------
-        function buildModelDropdown(diseaseKey) {
-            const select = document.getElementById('model_select');
-            select.innerHTML = '';
-            
-            const models = diseasesData[diseaseKey].models || [];
-            
-            models.forEach(model => {
-                const opt = document.createElement('option');
-                opt.value = model;
-                let formatName = model.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                if (model === 'mlp') formatName = 'MLP (Neural Network)';
-                opt.textContent = formatName;
-                select.appendChild(opt);
-            });
-        }
-
-        // -----------------------------------------------
-        // Build form fields for the selected disease
-        // -----------------------------------------------
-        function buildForm(diseaseKey) {
-            const container = document.getElementById('dynamicFields');
-            container.innerHTML = '';
-
-            const features = diseasesData[diseaseKey].features;
-
-            features.forEach(feat => {
-                const div = document.createElement('div');
-                div.className = 'form-group';
-
-                const displayLabel = formatLabel(feat);
-                const placeholderText = getPlaceholder(feat);
-
-                div.innerHTML = `
-                    <label for="field_${feat}">${displayLabel}</label>
-                    <input type="number" step="any" id="field_${feat}"
-                           name="${feat}" required placeholder="${placeholderText}">
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        // -----------------------------------------------
-        // Format feature names into readable labels
-        // -----------------------------------------------
-        function formatLabel(feat) {
-            const labelMap = {
-                'age': 'Patient Age',
-                'glucose': 'Glucose Level (mg/dL)',
-                'insulin': 'Insulin Level (uU/ml)',
-                'bmi': 'BMI (Body Mass Index)',
-                'chest_pain_type': 'Chest Pain Type (1-4)',
-                'thalassemia': 'Thalassemia (3=normal, 6=fixed, 7=reversible)',
-                'num_vessels': 'Major Vessels Colored (0-3)',
-                'max_heart_rate': 'Max Heart Rate Achieved',
-                'st_depression': 'ST Depression (exercise vs rest)',
-                'perimeter_worst': 'Cell Perimeter (worst)',
-                'area_worst': 'Cell Area (worst)',
-                'concave_points_worst': 'Concave Points (worst)',
-                'concave_points_mean': 'Concave Points (mean)',
-                'radius_worst': 'Cell Radius (worst)',
-                'area_mean': 'Cell Area (mean)',
-            };
-            return labelMap[feat] || feat.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-        }
-
-        // -----------------------------------------------
-        // Get realistic placeholder values
-        // -----------------------------------------------
-        function getPlaceholder(feat) {
-            const phMap = {
-                'age': 'e.g. 45',
-                'glucose': 'e.g. 105',
-                'insulin': 'e.g. 85',
-                'bmi': 'e.g. 26.4',
-                'chest_pain_type': 'e.g. 2',
-                'thalassemia': 'e.g. 3',
-                'num_vessels': 'e.g. 1',
-                'max_heart_rate': 'e.g. 150',
-                'st_depression': 'e.g. 1.2',
-                'perimeter_worst': 'e.g. 105.0',
-                'area_worst': 'e.g. 880.0',
-                'concave_points_worst': 'e.g. 0.11',
-                'concave_points_mean': 'e.g. 0.05',
-                'radius_worst': 'e.g. 16.5',
-                'area_mean': 'e.g. 550.0'
-            };
-            return phMap[feat] || 'e.g. 0';
-        }
-
-        // -----------------------------------------------
-        // Submit prediction
-        // -----------------------------------------------
-        document.getElementById('assessmentForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const resultDiv = document.getElementById('result');
-            const btn = document.getElementById('submitBtn');
-            
-            btn.textContent = "Analyzing...";
-            btn.disabled = true;
-            resultDiv.style.display = 'none';
-
-            const features = diseasesData[currentDisease].features;
-            const selectedModel = document.getElementById('model_select').value;
-            
-            const payload = { 
-                disease: currentDisease,
-                model_type: selectedModel 
-            };
-            
-            features.forEach(f => {
-                payload[f] = document.getElementById(`field_${f}`).value;
-            });
-
-            try {
-                const response = await fetch('/predict', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-                resultDiv.style.display = 'block';
-                
-                if (response.ok) {
-                    const diseaseName = diseasesData[currentDisease].display_name;
-                    const probText = result.probability !== null 
-                        ? ` (${result.probability}% confidence)` 
-                        : '';
-
-                    if (result.prediction === 1) {
-                        resultDiv.textContent = `${diseaseName}: Risk Detected${probText}`;
-                        resultDiv.className = 'result-high';
-                    } else {
-                        resultDiv.textContent = `${diseaseName}: Low Risk${probText}`;
-                        resultDiv.className = 'result-low';
-                    }
-                } else {
-                    resultDiv.textContent = "Error: " + (result.error || "Unknown system error");
-                    resultDiv.className = 'error';
-                }
-            } catch (err) {
-                console.error(err);
-                resultDiv.style.display = 'block';
-                resultDiv.textContent = "Connection failed. Ensure server is running.";
-                resultDiv.className = 'error';
-            } finally {
-                btn.textContent = "Analyze Risk";
-                btn.disabled = false;
-            }
-        });
-
-        // Boot
-        init();
-    </script>
+    <script src="/static/js/app.js"></script>
   </body>
 </html>

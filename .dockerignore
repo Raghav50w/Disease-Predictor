@@ -1,0 +1,26 @@
+.git/
+.github/
+.gitignore
+.ruff_cache/
+.pytest_cache/
+__pycache__/
+*.pyc
+*.egg-info/
+venv/
+.venv/
+env/
+
+# Artifacts are built inside the image, never copied from the host.
+models/
+
+tests/
+scripts/
+docs/
+*.md
+!README.md
+Dockerfile
+.dockerignore
+render.yaml
+.env
+.DS_Store
+.vs/

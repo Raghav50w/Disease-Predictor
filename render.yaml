@@ -1,0 +1,19 @@
+# Render blueprint. Create the service once via Render's dashboard
+# ("New > Blueprint"), then copy the service's deploy hook URL into the
+# RENDER_DEPLOY_HOOK_URL repository secret used by .github/workflows/ci.yml.
+services:
+  - type: web
+    name: healthscanner
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+
+    # Deploys are triggered by CI after tests pass, not by every push.
+    autoDeploy: false
+
+    healthCheckPath: /healthz
+
+    envVars:
+      - key: HEALTHSCAN_LOG_LEVEL
+        value: INFO
