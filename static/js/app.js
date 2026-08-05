@@ -66,20 +66,13 @@
     const disease = state.diseases[name];
 
     el.modelSelect.replaceChildren(
-      ...disease.models.map((model) => option(model.name, modelOptionLabel(model)))
+      ...disease.models.map((model) => option(model.name, model.display_name))
     );
     // Match the model the API would pick if model_type were omitted, rather
     // than whichever happens to sort first.
     el.modelSelect.value = disease.default_model;
     renderFields(disease.features);
     hideResult();
-  }
-
-  /** "Random Forest - 74.7% accurate", or just the name if untrained metrics. */
-  function modelOptionLabel(model) {
-    const accuracy = model.metrics && model.metrics.accuracy;
-    if (accuracy == null) return model.display_name;
-    return model.display_name + ' — ' + (accuracy * 100).toFixed(1) + '% accurate';
   }
 
   function renderFields(features) {

@@ -1,5 +1,8 @@
 # HealthScanner
 
+**Live demo: <https://healthscanner-s7nv.onrender.com>**
+(it's on a free instance, so the first load can take ~50 seconds while it wakes up)
+
 A multi-disease risk predictor I built to learn how a machine learning model
 actually gets from a CSV to something people can use in a browser.
 

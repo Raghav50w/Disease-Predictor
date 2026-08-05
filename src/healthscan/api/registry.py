@@ -176,7 +176,6 @@ class ModelRegistry:
                     {
                         "name": model_type,
                         "display_name": MODEL_DISPLAY_NAMES.get(model_type, model_type),
-                        "metrics": self.model_metrics(name, model_type),
                     }
                     for model_type in sorted(artifacts.models)
                 ],
@@ -187,17 +186,6 @@ class ModelRegistry:
         """Model the UI pre-selects, falling back if it was never trained."""
         models = self.get(disease).models
         return DEFAULT_MODEL if DEFAULT_MODEL in models else sorted(models)[0]
-
-    def model_metrics(self, disease: str, model_type: str) -> dict | None:
-        """Held-out test scores for one model, or ``None`` if unavailable."""
-        entry = (
-            self.metrics.get("diseases", {})
-            .get(disease, {})
-            .get("models", {})
-            .get(model_type, {})
-            .get("holdout")
-        )
-        return entry or None
 
     # ------------------------------------------------------------------
     # Inference

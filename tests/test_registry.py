@@ -136,19 +136,19 @@ def test_default_model_falls_back_when_not_trained(registry):
     assert fallback in registry.diseases["diabetes"].models
 
 
-def test_catalog_attaches_holdout_metrics(registry):
+def test_catalog_names_every_model(registry):
     models = registry.catalog()["diseases"]["diabetes"]["models"]
     forest = next(m for m in models if m["name"] == "random_forest")
 
     assert forest["display_name"] == "Random Forest"
-    assert 0.0 <= forest["metrics"]["accuracy"] <= 1.0
 
 
-def test_catalog_handles_absent_metrics(models_dir):
+def test_absent_metrics_file_is_not_fatal(models_dir):
+    """Scores are served by /api/metrics; the catalog must not depend on them."""
     (models_dir / "metrics.json").unlink()
 
     registry = ModelRegistry(models_dir)
     registry.load()
 
-    models = registry.catalog()["diseases"]["diabetes"]["models"]
-    assert all(model["metrics"] is None for model in models)
+    assert registry.metrics == {}
+    assert registry.catalog()["diseases"]["diabetes"]["models"]
