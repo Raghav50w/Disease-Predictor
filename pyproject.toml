@@ -1,34 +1,4 @@
-[build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
-
-[project]
-name = "healthscan"
-version = "2.0.0"
-description = "Multi-disease risk assessment API and web UI backed by scikit-learn models"
-readme = "README.md"
-requires-python = ">=3.11"
-license = { text = "MIT" }
-
-# Versions are pinned deliberately: models are distributed as pickles, and an
-# unpinned scikit-learn silently breaks unpickling on a minor version bump.
-dependencies = [
-    "numpy==2.4.6",
-    "pandas==3.0.3",
-    "scikit-learn==1.8.0",
-    "flask==3.1.3",
-    "gunicorn==23.0.0",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest==8.4.2",
-    "pytest-cov==6.2.1",
-    "ruff==0.14.0",
-]
-
-[tool.setuptools.packages.find]
-where = ["src"]
+# Tool configuration only. Dependencies live in requirements.txt.
 
 [tool.ruff]
 line-length = 100
@@ -41,5 +11,4 @@ ignore = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
 filterwarnings = ["ignore::DeprecationWarning"]

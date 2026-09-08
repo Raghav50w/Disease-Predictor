@@ -53,9 +53,10 @@
   // -------------------------------------------------------------- render
 
   function buildDiseaseSelect(names) {
-    el.diseaseSelect.replaceChildren(
-      ...names.map((name) => option(name, state.diseases[name].display_name))
-    );
+    el.diseaseSelect.replaceChildren();
+    for (const name of names) {
+      el.diseaseSelect.appendChild(option(name, state.diseases[name].display_name));
+    }
     el.diseaseSelect.addEventListener('change', (event) => selectDisease(event.target.value));
   }
 
@@ -65,9 +66,10 @@
 
     const disease = state.diseases[name];
 
-    el.modelSelect.replaceChildren(
-      ...disease.models.map((model) => option(model.name, model.display_name))
-    );
+    el.modelSelect.replaceChildren();
+    for (const model of disease.models) {
+      el.modelSelect.appendChild(option(model.name, model.display_name));
+    }
     // Match the model the API would pick if model_type were omitted, rather
     // than whichever happens to sort first.
     el.modelSelect.value = disease.default_model;
@@ -76,7 +78,10 @@
   }
 
   function renderFields(features) {
-    el.fields.replaceChildren(...features.map(buildField));
+    el.fields.replaceChildren();
+    for (const feature of features) {
+      el.fields.appendChild(buildField(feature));
+    }
   }
 
   /** Build one labelled input (or select, for enumerated features). */
@@ -138,9 +143,9 @@
     const select = document.createElement('select');
     select.id = inputId;
     select.name = feature.name;
-    select.replaceChildren(
-      ...feature.options.map((choice) => option(String(choice.value), choice.label))
-    );
+    for (const choice of feature.options) {
+      select.appendChild(option(String(choice.value), choice.label));
+    }
     if (feature.default != null) {
       select.value = String(feature.default);
     }

@@ -13,11 +13,12 @@ env/
 # Artifacts are built inside the image, never copied from the host.
 models/
 
+# Local-only.
+notes/
+.claude/
+
 tests/
-scripts/
-docs/
 *.md
-!README.md
 Dockerfile
 .dockerignore
 render.yaml

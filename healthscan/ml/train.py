@@ -14,8 +14,6 @@ Step 4 is deliberate: the reported numbers come from data the model never
 saw, while the shipped artifact is trained on everything available.
 """
 
-from __future__ import annotations
-
 import json
 import logging
 import pickle
@@ -126,12 +124,15 @@ def train_disease(csv_path: Path, disease: str, models_dir: Path = MODELS_DIR) -
     )
 
     models_dir.mkdir(parents=True, exist_ok=True)
-    _dump(models_dir / f"{disease}_features.pkl", feature_cols)
+    _write_json(models_dir / f"{disease}_features.json", feature_cols)
 
     # The shipped scaler is fit on the full dataset, matching the shipped
     # models. Evaluation never touches it - see healthscan.ml.evaluate.
     scaler = StandardScaler().fit(X)
-    _dump(models_dir / f"{disease}_scaler.pkl", scaler)
+    _write_json(
+        models_dir / f"{disease}_scaler.json",
+        {"mean": scaler.mean_.tolist(), "scale": scaler.scale_.tolist()},
+    )
     X_scaled = scaler.transform(X)
 
     results = {}
@@ -164,15 +165,21 @@ def train_disease(csv_path: Path, disease: str, models_dir: Path = MODELS_DIR) -
 
 
 def _dump(path: Path, obj) -> None:
+    """Save a fitted model."""
     with open(path, "wb") as fh:
         pickle.dump(obj, fh)
 
 
+def _write_json(path: Path, obj) -> None:
+    """Save plain data (feature names, scaler numbers) so it stays readable."""
+    path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
+
+
 def _clear_artifacts(models_dir: Path) -> None:
     models_dir.mkdir(parents=True, exist_ok=True)
-    for stale in [*models_dir.glob("*.pkl"), models_dir / METRICS_FILENAME]:
-        if stale.exists():
-            stale.unlink()
+    stale = list(models_dir.glob("*.pkl")) + list(models_dir.glob("*.json"))
+    for path in stale:
+        path.unlink()
 
 
 def main() -> int:

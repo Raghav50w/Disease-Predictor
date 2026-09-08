@@ -1,41 +1,20 @@
-"""Single source of truth for paths, training constants, and feature metadata.
+"""Paths, training constants, and the feature metadata for every disease.
 
-``DISEASE_META`` is the important part. Every consumer reads feature
-information from here rather than redefining it:
+DISEASE_META drives everything: which columns to keep, the model's feature
+order, the API's validation bounds, and the form the frontend draws. Adding a
+disease means adding an entry here plus a CSV in datasets/.
 
-* ``ml.preprocess`` uses the ``features`` keys to decide which raw columns to
-  keep, and ``target_column`` for the label.
-* ``ml.train`` uses the ``features`` order as the model's feature order, and
-  ``impute_zero`` to decide which zeros are physiologically impossible and
-  should be median-imputed.
-* ``api.validation`` uses ``min``/``max`` as request validation bounds.
-* the frontend renders labels, units, help text, and input bounds straight
-  from the ``/api/diseases`` payload.
-
-A disease must have an entry here to be trained or served - there is no
-"guess it from the CSV" fallback, so the config and the artifacts cannot
-disagree about feature order or bounds.
-
-Each feature's ``default`` is a typical value for that population, roughly the
-dataset mean. The frontend pre-fills every field with it and also uses it as
-the placeholder, so the form is submittable on load and a visitor can get a
-result without hunting for plausible clinical values. One key rather than a
-separate ``placeholder``/``default`` pair, so the two cannot drift apart.
-
-Adding a fourth disease means adding an entry here plus a CSV in
-``datasets/``; no HTML or JavaScript changes are required.
+Each feature's `default` is a typical value for that population, used to
+pre-fill the form so it is submittable on load.
 """
 
-from __future__ import annotations
-
-import os
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parents[2]
-DATASETS_DIR = Path(os.environ.get("HEALTHSCAN_DATASETS_DIR", BASE_DIR / "datasets"))
+BASE_DIR = Path(__file__).resolve().parents[1]
+DATASETS_DIR = BASE_DIR / "datasets"
 RAW_DIR = DATASETS_DIR / "raw"
-MODELS_DIR = Path(os.environ.get("HEALTHSCAN_MODELS_DIR", BASE_DIR / "models"))
-STATIC_DIR = Path(os.environ.get("HEALTHSCAN_STATIC_DIR", BASE_DIR / "static"))
+MODELS_DIR = BASE_DIR / "models"
+STATIC_DIR = BASE_DIR / "static"
 
 METRICS_FILENAME = "metrics.json"
 
@@ -76,22 +55,38 @@ CLEVELAND_COLUMNS = [
 ]
 
 WDBC_FEATURE_NAMES = [
-    f"{base}_{suffix}"
-    for suffix in ("mean", "se", "worst")
-    for base in (
-        "radius",
-        "texture",
-        "perimeter",
-        "area",
-        "smoothness",
-        "compactness",
-        "concavity",
-        "concave_points",
-        "symmetry",
-        "fractal_dimension",
-    )
+    "radius_mean",
+    "texture_mean",
+    "perimeter_mean",
+    "area_mean",
+    "smoothness_mean",
+    "compactness_mean",
+    "concavity_mean",
+    "concave_points_mean",
+    "symmetry_mean",
+    "fractal_dimension_mean",
+    "radius_se",
+    "texture_se",
+    "perimeter_se",
+    "area_se",
+    "smoothness_se",
+    "compactness_se",
+    "concavity_se",
+    "concave_points_se",
+    "symmetry_se",
+    "fractal_dimension_se",
+    "radius_worst",
+    "texture_worst",
+    "perimeter_worst",
+    "area_worst",
+    "smoothness_worst",
+    "compactness_worst",
+    "concavity_worst",
+    "concave_points_worst",
+    "symmetry_worst",
+    "fractal_dimension_worst",
 ]
-WDBC_COLUMNS = ["id", "diagnosis", *WDBC_FEATURE_NAMES]
+WDBC_COLUMNS = ["id", "diagnosis"] + WDBC_FEATURE_NAMES
 
 
 DISEASE_META = {

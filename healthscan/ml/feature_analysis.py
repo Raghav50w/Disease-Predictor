@@ -7,8 +7,6 @@ prints ranked ``feature_importances_``, which is how the shortlist in
     python -m healthscan.ml.feature_analysis
 """
 
-from __future__ import annotations
-
 import logging
 import sys
 

@@ -22,12 +22,17 @@ models/
 htmlcov/
 coverage.xml
 
+# Tooling / assistants
+.claude/
+
+# Private setup notes (never committed)
+SETUP.md
+
 # Editors / OS
 .vs/
 .vscode/
 .idea/
 .DS_Store
 
-# Local planning notes
-PLAN.md
-project_improvements.md
+# Local planning / study notes (never committed)
+notes/
